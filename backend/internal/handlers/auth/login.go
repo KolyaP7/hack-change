@@ -27,19 +27,19 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	passwordHash, userId, err := db.GetUserByEmail(req.Email)
+	user, err := db.GetUserByEmail(req.Email)
 	if err != nil {
 		log.Println("GetUserByEmail error:", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(req.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
 
-	TokenString, err := auth.GenerateToken(userId)
+	TokenString, err := auth.GenerateToken(int(user.ID))
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
@@ -47,5 +47,5 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(struct{ Token string }{Token: TokenString})
+	json.NewEncoder(w).Encode(struct{ token string }{token: TokenString})
 }

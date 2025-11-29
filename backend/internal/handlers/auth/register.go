@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"hack-change-backend/internal/repository/db"
+	"hack-change-backend/pkg/models"
 )
 
 type registerRequest struct {
@@ -38,11 +39,15 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println("GenerateFromPassword error:", err)
-		http.Error(w, fmt.Sprintf("failed to genereta password hash: %s", err), http.StatusInternalServerError)
+		http.Error(w, "failed to genereta password hash", http.StatusInternalServerError)
 		return
 	}
 
-	err = db.CreateUser(struct {name string passwordhash string}{req.Name, req.Email, passwordHash})
+	err = db.CreateUser(&models.User{
+		UserName:     req.Name,
+		Email:        req.Email,
+		PasswordHash: string(passwordHash),
+	})
 	if err != nil {
 		log.Println("CreateUser error:", err)
 		http.Error(w, fmt.Sprintf("failed to create user: %s", err), http.StatusInternalServerError)

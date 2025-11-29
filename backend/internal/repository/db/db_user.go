@@ -13,7 +13,7 @@ func GetUserByEmail(email string) (*models.User, error) {
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, errors.New("Пользователь не найден")
+			return nil, errors.New("user not found")
 		}
 		return nil, result.Error
 	}

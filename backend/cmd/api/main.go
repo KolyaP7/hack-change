@@ -2,6 +2,8 @@ package main
 
 import (
 	"hack-change-backend/internal/handlers/auth"
+	"hack-change-backend/internal/handlers/project"
+	"hack-change-backend/internal/middleware"
 	"hack-change-backend/internal/repository/db"
 	"hack-change-backend/pkg/getenv"
 	"log"
@@ -40,6 +42,13 @@ func main() {
 		r.Post("/login", auth.Login)
 		r.Post("/register", auth.Register)
 		r.Post("/logout", auth.Logout)
+	})
+
+	r.Route("/project", func(r chi.Router) {
+		r.Use(middleware.AuthMiddleware())
+		r.Post("/create", project.CreateProject)
+		r.Get("/getall", project.GetProjectsByUser)
+		r.Get("/getinfo", project.GetProjectStatistics)
 	})
 
 	err := db.ConnectDB()
