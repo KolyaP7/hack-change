@@ -6,15 +6,6 @@ import (
     "log"
 )
 
-func CreateUser(user *models.User) error {
-    result := db.Create(user)
-    if result.Error != nil {
-        log.Printf("Ошибка создания пользователя: %v", result.Error)
-        return result.Error
-    }
-    return nil
-}
-
 func GetUserByEmail(email string) (*models.User, error) {
     var user models.User
     result := db.Where("email = ?", email).First(&user)
@@ -28,5 +19,19 @@ func GetUserByEmail(email string) (*models.User, error) {
     
     return user.PasswordHash, user.ID, nil
 }
+
+func CreateUser(user *models.User) error {
+    result = db.Model(user).Creates(map[string]interface{}{
+        "user_name": user.UserName,
+        "password_hash": user.PasswordHash,
+    })
+    
+    if result.Error != nil {
+        return result.Error
+    }
+    
+    return nil
+}
+
 
 
