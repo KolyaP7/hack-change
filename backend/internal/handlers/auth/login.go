@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	// dbase "hack-change-backend/internal/repository/db"
+	"hack-change-backend/internal/repository/db"
 	"hack-change-backend/pkg/auth"
 
 	"golang.org/x/crypto/bcrypt"
@@ -27,23 +27,19 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := dbase.GetUserByEmail(req.Email)
+	passwordHash, userId, err := db.GetUserByEmail(req.Email)
 	if err != nil {
 		log.Println("GetUserByEmail error:", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	if user == nil {
+
+	if err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(req.Password)); err != nil {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
-		http.Error(w, "invalid credentials", http.StatusUnauthorized)
-		return
-	}
-
-	TokenString, err := auth.GenerateToken(user.userID)
+	TokenString, err := auth.GenerateToken(userId)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return

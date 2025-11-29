@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	dbase "hack-change-backend/internal/repository/db"
+	"golang.org/x/crypto/bcrypt"
+
+	"hack-change-backend/internal/repository/db"
 )
 
 type registerRequest struct {
@@ -32,8 +34,15 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "name, email, password are required", http.StatusBadRequest)
 		return
 	}
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 
-	err := dbase.CreateUser(req.Name, req.Email, req.Password)
+	if err != nil {
+		log.Println("GenerateFromPassword error:", err)
+		http.Error(w, fmt.Sprintf("failed to genereta password hash: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	err = db.CreateUser(struct {name string passwordhash string}{req.Name, req.Email, passwordHash})
 	if err != nil {
 		log.Println("CreateUser error:", err)
 		http.Error(w, fmt.Sprintf("failed to create user: %s", err), http.StatusInternalServerError)
