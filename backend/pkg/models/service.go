@@ -15,7 +15,7 @@ func CreateUser(user *models.User) error {
     return nil
 }
 
-func GetUserEmail(email string) (*models.User, error) {
+func GetUserByEmail(email string) (*models.User, error) {
     var user models.User
     result := db.Where("email = ?", email).First(&user)
     
