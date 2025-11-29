@@ -26,7 +26,7 @@ func GetUserEmail(email string) (*models.User, error) {
         return nil, result.Error
     }
     
-    return &user, nil
+    return user.PasswordHash, user.ID, nil
 }
 
 
