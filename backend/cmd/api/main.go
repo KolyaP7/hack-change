@@ -2,6 +2,7 @@ package main
 
 import (
 	"hack-change-backend/internal/handlers/auth"
+	"hack-change-backend/internal/repository/db"
 	"hack-change-backend/pkg/getenv"
 	"log"
 	"net/http"
@@ -41,16 +42,17 @@ func main() {
 		r.Post("/logout", auth.Logout)
 	})
 
-	// err := dBase.Connect()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// } else {
-	// 	defer dBase.Db.Close()
-
-	if err := http.ListenAndServe(getenv.GetValue("BACK_PORT", ":8080"), r); err != nil {
+	err := db.ConnectDB()
+	if err != nil {
 		log.Fatal(err)
-		// fmt.Println(dBase.Db)
-	}
-	// }
+	} else {
+		// defer db.DB.Close()
 
+		if err := http.ListenAndServe(getenv.GetValue("BACK_PORT", ":8080"), r); err != nil {
+			log.Fatal(err)
+			// fmt.Println(dBase.Db)
+		}
+		// }
+
+	}
 }
