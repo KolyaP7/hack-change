@@ -15,3 +15,18 @@ func CreateUser(user *models.User) error {
     return nil
 }
 
+func GetUserEmail(email string) (*models.User, error) {
+    var user models.User
+    result := db.Where("email = ?", email).First(&user)
+    
+    if result.Error != nil {
+        if gorm.IsRecordNotFoundError(result.Error) {
+            return nil, errors.New("Пользователь не найден")
+        }
+        return nil, result.Error
+    }
+    
+    return &user, nil
+}
+
+
